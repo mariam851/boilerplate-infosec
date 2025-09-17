@@ -5,6 +5,31 @@ const helmet = require("helmet");
 app.use(helmet());
 
 
+app.use(helmet.hidePoweredBy());
+app.use(helmet.frameguard({ action: 'deny' }));
+app.use(helmet.xssFilter())
+app.use(helmet.noSniff())
+app.use(helmet.ieNoOpen())
+const ninetyDaysInSeconds = 90 * 24 * 60 * 60;
+
+
+app.use(helmet({
+  hidePoweredBy: true,
+  frameguard: { action: 'deny' },
+  xssFilter: true,
+  noSniff: true,
+  ieNoOpen: true,
+  hsts: {maxAge: ninetyDaysInSeconds, force: true},
+  dnsPrefetchControl: {allow: false},
+  noCache: true,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", 'trusted-cdn.com'],
+      styleSrc: ['style.com']
+    }
+  }
+}));
 
 
 
@@ -49,6 +74,7 @@ app.use(helmet());
 
 module.exports = app;
 const api = require('./server.js');
+
 app.use(express.static('public'));
 app.disable('strict-transport-security');
 app.use('/_api', api);
